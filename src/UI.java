@@ -124,11 +124,11 @@ public class UI {
 
     public String formatPlayerDisplay(Game game){
         return 
-            "│    " 
+            colourMain("│    ") 
             + colourText(game.P1Name, game.P1Colour.equals("r") ? "red" : "yellow") 
             + " ".repeat(ScreenWidth - game.P1Name.length() - game.P2Name.length() - 10) 
             + colourText(game.P2Name, (game.P1Colour.equals("r") ? "yellow" : "red")) 
-            + "    │";
+            + colourMain("    │");
     }
 
     public String formatBoard(String turn, String boardString) {
@@ -174,16 +174,30 @@ public class UI {
         );
     }
 
-    public void printBoardPage(Game game, String boardString,String err) {
+    public void printBoardPage(Game game,String err) {
         String player = (game.currentTurn.equals("y")) ? "Yellow" : "Red";
         setMainColour(player.toLowerCase());
         printPage(
-            " " + player + " Turn ",
+            " " + player + "'s Turn ",
             player + " Player Make Your Move:",
-            formatPlayerDisplay(game) + "\n" + formatBoard(game.currentTurn, boardString) ,
+            formatPlayerDisplay(game) + "\n" + formatBoard(game.currentTurn, game.board.toString()) ,
             err
         );
     }
+
+    public void printWinPage(Game game, String err) {
+        String playerColour = (game.winner.equals("y")) ? "Yellow" : "Red";
+        String playerName =(game.winner.equals(game.P1Colour) ? game.P1Name : game.P2Name);
+        setMainColour("blue");
+        printPage(
+            " " + playerColour + "Wins ",
+            playerColour + " ( " + playerName + " ) has won!",
+            formatPlayerDisplay(game) + "\n" + formatBoard(game.winner, game.board.toString()).split("^")[0] ,
+            err
+        );
+    }
+
+    
 
     public void printMessagePage(String title, String message, String err) {
         printPage(title, message, "", err);

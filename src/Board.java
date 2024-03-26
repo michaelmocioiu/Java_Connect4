@@ -13,12 +13,13 @@ public class Board {
 
     public int[] getEmptyColumns() {
         String out = ""; 
-        for (int i = 0; i < 6; i++) {
-            if (getEmptySlot(i) != -1) {
-                out += i + " "; 
+        for (int i = 1; i < 7; i++) {
+            if (getEmptySlot(i - 1) != -1) {
+                out += i + " ";
             }
         }
-        return Arrays.stream(out.split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        int[] a = Arrays.stream(out.split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        return a;
     }
 
     public int getEmptySlot(int col) {
@@ -59,34 +60,41 @@ public class Board {
             }
         }
 
-        //
+        //diagonal (NE)
         count = 0;
         int startRow = y - Math.min(y, x);
         int startCol = x - Math.min(y, x);
         for (int i = 0; i <= Math.min(6 - startRow, 5 - startCol); i++) {
-            if (boardData[startRow + i][startCol + i].equals(player)) {
-                count++;
-                if (count == 4) return true;
-            } else {
-                count = 0;
+            int currentRow = startRow + i;
+            int currentCol = startCol + i;
+            if (currentRow >= 0 && currentRow < 6 && currentCol >= 0 && currentCol < 7) {
+                if (boardData[currentCol][currentRow].equals(player)) {
+                    count++;
+                    if (count == 4) return true;
+                } else {
+                    count = 0;
+                }
             }
         }
 
+        //diagonal (NW)
         count = 0;
         startRow = y + Math.min(5 - y, x);
         startCol = x - Math.min(5 - y, x);
-        for (int i = 0; i <= Math.min(startRow, 6 - startCol); i++) {
-            if (boardData[startRow - i][startCol + i].equals(player)) {
-                count++;
-                if (count == 4) return true;
-            } else {
-                count = 0;
+        for (int i = 0; i <= Math.min(startRow, 5 - startCol); i++) {
+            int currentRow = startRow - i;
+            int currentCol = startCol + i;
+            if (currentRow >= 0 && currentRow < 6 && currentCol >= 0 && currentCol < 7) {
+                if (boardData[currentCol][currentRow].equals(player)) {
+                    count++;
+                    if (count == 4) return true;
+                } else {
+                    count = 0;
+                }
             }
         }
         return false;
     }
-
-
 
 
     public int placePiece(int posX, String colour) {
@@ -104,7 +112,7 @@ public class Board {
     }
 
     public String getPieceString(String colour) {
-        return (colour.equals("r") ? "\u001B[31m" : "\u001B[33m") + "O\u001B[0m";
+        return (colour.equals("r") ? "\u001B[31m" : "\u001B[33m") + "\u2B24\u001B[0m";
     }
     
 
