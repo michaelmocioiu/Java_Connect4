@@ -1,142 +1,172 @@
 import java.util.Arrays;
 
 public class Board {
-    //the board data will be stored sideways to make the action code simpler
-    //top row in the array is the leftmost board column, and leftmost column is the bottom row
+    // the board data will be stored sideways to make the action code simpler
+    // top row in the array is the leftmost board column, and leftmost column is the
+    // bottom row
     public String[][] boardData = new String[7][6];
+    public String currentTurn;
 
     public Board() {
         for (String[] col : boardData) {
             Arrays.fill(col, " ");
-        }  
+        }
+        this.currentTurn = "r";
     }
 
-    public int[] getEmptyColumns() {
-        String out = ""; 
-        for (int i = 1; i < 7; i++) {
-            if (getEmptySlot(i - 1) != -1) {
-                out += i + " ";
+    public Board(String[][] boardData, String currentTurn) {
+        this.boardData = boardData;
+        this.currentTurn = currentTurn;
+    }
+
+    public Board clone() {
+        String[][] clonedata = Arrays.copyOf(boardData, boardData.length);
+        for (int i = 0; i < boardData.length; i++) {
+            clonedata[i] = Arrays.copyOf(boardData[i], boardData[i].length);
+        }
+        return new Board(clonedata, this.currentTurn);
+    }
+
+    public boolean isCellEmpty(int col, int row) {
+        return boardData[col][row].equals(" ");
+    }
+
+    public boolean isCellMine(int col, int row) {
+        return boardData[col][row].equals(currentTurn);
+    }
+
+    public boolean isCellOpponent(int col, int row) {
+        return !isCellMine(col, row);
+    }
+
+    public int[] getAvailableColumns() {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i <= 6; i++) {
+            if (getEmptyRow(i) != -1) {
+                out.append(i).append(" ");
             }
         }
-        int[] a = Arrays.stream(out.split("\\s+")).mapToInt(Integer::parseInt).toArray();
-        return a;
+        return Arrays.stream(out.toString().split("\\s+")).mapToInt(Integer::parseInt).toArray();
     }
 
-    public int getEmptySlot(int col) {
+    public int getEmptyRow(int col) {
         if (col < 0 || col > 6) {
             throw new IllegalArgumentException("Invalid column: must be 0-6");
         }
-        for (int i = 0; i < 6; i++) {
-            if (boardData[col][i].equals(" ")) {
-                return i;
+        for (int row = 0; row < 6; row++) {
+            if (isCellEmpty(col, row)) {
+                return row;
             }
         }
         return -1;
     }
 
-
-    public boolean isPlayerWin(int x, int y) {
-        String player = boardData[x][y];
-
-        //horizontal
+    public boolean isGameWin(int startCol, int startRow) {
+        // horizontal
         int count = 0;
-        for (int col = Math.max(0, x - 3); col <= Math.min(6, x + 3); col++) {
-            if (boardData[col][y].equals(player)) {
+        for (int col = Math.max(0, startCol - 3); col <= Math.min(6, startCol + 3); col++) {
+            if (isCellMine(col, startRow)) {
                 count++;
-                if (count == 4) return true;
-            } else {
-                count = 0;
-            }
-        }
-        
-        //vertical
-        count = 0;
-        for (int row = Math.max(0, y - 3); row <= Math.min(5, y + 3); row++) {
-            if (boardData[x][row].equals(player)) {
-                count++;
-                if (count == 4) return true;
+                if (count == 4)
+                    return true;
             } else {
                 count = 0;
             }
         }
 
-        //diagonal (NE)
+        // vertical
         count = 0;
-        int startRow = y - Math.min(y, x);
-        int startCol = x - Math.min(y, x);
-        for (int i = 0; i <= Math.min(6 - startRow, 5 - startCol); i++) {
-            int currentRow = startRow + i;
-            int currentCol = startCol + i;
-            if (currentRow >= 0 && currentRow < 6 && currentCol >= 0 && currentCol < 7) {
-                if (boardData[currentCol][currentRow].equals(player)) {
-                    count++;
-                    if (count == 4) return true;
-                } else {
-                    count = 0;
-                }
+        for (int row = Math.max(0, startRow - 3); row <= Math.min(5, startRow + 3); row++) {
+            if (isCellMine(startCol, row)) {
+                count++;
+                if (count == 4)
+                    return true;
+            } else {
+                count = 0;
             }
         }
 
-        //diagonal (NW)
+        // diagonal (NE)
         count = 0;
-        startRow = y + Math.min(5 - y, x);
-        startCol = x - Math.min(5 - y, x);
-        for (int i = 0; i <= Math.min(startRow, 5 - startCol); i++) {
-            int currentRow = startRow - i;
-            int currentCol = startCol + i;
-            if (currentRow >= 0 && currentRow < 6 && currentCol >= 0 && currentCol < 7) {
-                if (boardData[currentCol][currentRow].equals(player)) {
-                    count++;
-                    if (count == 4) return true;
-                } else {
-                    count = 0;
-                }
+        int minNumb = Math.min(startCol, startRow);
+        int currentRow = startRow - minNumb;
+        int currentCol = startCol - minNumb;
+        while (currentRow <= 5 && currentCol <= 6) {
+            if (isCellMine(currentCol, currentRow)) {
+                count++;
+                if (count == 4)
+                    return true;
+            } else {
+                count = 0;
             }
+            currentRow++;
+            currentCol++;
+        }
+
+        // diagonal (NW)
+        count = 0;
+        minNumb = Math.min(startCol, 5 - startRow);
+        currentCol = startCol - minNumb;
+        currentRow = startRow + minNumb;
+        while (currentRow >= 0 && currentCol <= 6) {
+            if (isCellMine(currentCol, currentRow)) {
+                count++;
+                if (count == 4)
+                    return true;
+            } else {
+                count = 0;
+            }
+            currentRow--;
+            currentCol++;
         }
         return false;
     }
 
-
-    public int placePiece(int posX, String colour) {
-        if (posX < 0 || posX > 6) {
+    public int placePiece(int col) {
+        if (col < 0 || col > 6) {
             throw new IllegalArgumentException("Invalid column: must be 0-6");
         }
-        int posY = getEmptySlot(posX);
-        if (posY >= 0){
-            boardData[posX][posY] = getPieceString(colour);
-            System.out.println(posY);
-            return posY;
+        int row = getEmptyRow(col);
+        if (row >= 0) {
+            boardData[col][row] = currentTurn;
+            if (isGameWin(col, row)) {
+                return -1;
+            }
+            currentTurn = currentTurn.equals("r") ? "y" : "r";
+            return row;
         } else {
-            throw new IllegalArgumentException("Column is full!");
+            throw new IllegalArgumentException("Column " + (col + 1) + " is full!");
         }
     }
 
-    public String getPieceString(String colour) {
-        return (colour.equals("r") ? "\u001B[31m" : "\u001B[33m") + "\u2B24\u001B[0m";
+    public String getDisplayPiece(String piece) {
+        return (piece.equals("r") ? "\u001B[31mO" : (piece.equals("y")) ? "\u001B[33mX" : " ") + "\u001B[0m";
     }
-    
 
-    @Override
-    public String toString(){
+    public String draw() {
         String topBorder = "┌───┬───┬───┬───┬───┬───┬───┐\n";
         String middleBorder = "├───┼───┼───┼───┼───┼───┼───┤\n";
         String bottomBorder = "└───┴───┴───┴───┴───┴───┴───┘\n";
-        String[] indicator = new String[]{"",""};
-        String out = topBorder;
+        StringBuilder out = new StringBuilder(topBorder);
         for (int y = 5; y >= 0; y--) {
-            out += "│";
+            out.append("│");
             for (int x = 0; x < 7; x++) {
-                out += " " + boardData[x][y] + " │";
+                out.append(" ").append(getDisplayPiece(boardData[x][y])).append(" │");
             }
-            out += "\n" + ((y > 0) ? middleBorder : bottomBorder);
+            out.append("\n").append((y > 0) ? middleBorder : bottomBorder);
         }
-        for (int i = 0; i < 7; i++) {
-            indicator[0] += (getEmptySlot(i) == -1) ? UI.colourText("  ^ ", "red") : UI.colourText("  ^ ", "green");
-            indicator[1] += (getEmptySlot(i) == -1) ? UI.colourText(" (" + (i + 1) + ")", "red") : UI.colourText(" (" + (i + 1) + ")", "green");
-        }
-        out += indicator[0] + " \n" + indicator[1] + " ";
-
-
-        return out;
+        return out.toString();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        for (String[] column : boardData) {
+            for (String cell : column) {
+                out.append(cell).append(",");
+            }
+        }
+        return out.toString();
+    }
+
 }

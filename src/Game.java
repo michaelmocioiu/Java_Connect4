@@ -2,13 +2,14 @@ import java.util.Scanner;
 
 public class Game {
     public boolean isAiMatch;
-    public String P1Colour,P1Name, P2Name, err, currentTurn, winner;
+    public String P1Colour, P2Colour,P1Name, P2Name, err, currentTurn, winner;
     public Board board = new Board();
     Scanner scanner = new Scanner(System.in);
     UI Ui = new UI(130);
 
     public Game () {
-      P1Colour = "";
+      P1Colour = "r";
+      P2Colour = "y";
       P1Name = "";
       P2Name = "CPU";
       currentTurn = "r";
@@ -18,6 +19,7 @@ public class Game {
     public void RestartMatch() {
         board = new Board();
         winner = "";
+        board.currentTurn = "r";
     }
 
 
@@ -39,21 +41,45 @@ public class Game {
     }
 
     public void StartGame() {
-        if (getMCInput("Team Selection", "Player 1 select your colour:", "Red,Yellow") == 1) {
-            P1Colour = "r";
-        } else P1Colour = "y";
-        P1Name = getNameInput(1);
-        if (!isAiMatch) {
-            
+        if (getMCInput("Team Selection", "Player 1 select your colour:", "Red,Yellow") == 2) {
+            P1Colour = "y";
+            P2Colour = "r";
         }
+        P1Name = getNameInput(1);
         if (isAiMatch) {
             while (true) {
                 RestartMatch();
+                int diffInput = getMCInput("Select Bot Difficulty", "Select the difficulty of the bot,(Smarter bots need more time to think)", "Normal,Hard,Genius");
+                int depth = (diffInput == 1) ? 3 : (diffInput == 2) ? 5 : 7;
+                // board.boardData = new String[][] {
+                //     {
+                //         " ", " ", " ", " ", " ", " "
+                //     },
+                //     {
+                //         "y", " ", " ", " ", " ", " "
+                //     },
+                //     {
+                //         "y", "y", "y", " ", " ", " "
+                //     },
+                //     {
+                //         " ", " ", " ", " ", " ", " "
+                //     },
+                //     {
+                //         " ", " ", " ", " ", " ", " "
+                //     },
+                //     {
+                //         " ", " ", " ", " ", " ", " "
+                //     },
+                //     {
+                //         " ", " ", " ", " ", " ", " "
+                //     }
+                // };
                 while (winner.equals("")) {
                     if (currentTurn == P1Colour) {
-                        resolveTurn(getGameInput(), currentTurn, board);
+                        resolveTurn(getGameInput(), board);
                     } else {
-                        resolveTurn(Bot.Move(board), currentTurn, board);
+                        int botMove = Bot.Move(board, depth);
+                        resolveTurn(botMove, board);
                     }
                     currentTurn = (currentTurn.equals("r") ? "y" : "r"); 
                 }
@@ -66,7 +92,7 @@ public class Game {
             while(true){
                 RestartMatch();
                 while (winner.equals("")) {
-                    resolveTurn(getGameInput(), currentTurn, board);
+                    resolveTurn(getGameInput(), board);
                     currentTurn = (currentTurn.equals("r") ? "y" : "r");
 
                 }
@@ -77,15 +103,11 @@ public class Game {
         }
     }
 
-    public void StartTurn(){
 
-    }
-
-
-    public void resolveTurn(int posX, String colour, Board board){
-        int y = board.placePiece(posX, colour);
-        if (board.isPlayerWin(posX, y)) {
-            winner = colour;
+    public void resolveTurn(int posX, Board board){
+        int y = board.placePiece(posX);
+        if (y == -1) {
+            winner = board.currentTurn;
         }
     }
 
@@ -94,7 +116,7 @@ public class Game {
             try {
                 Ui.printWinPage(this, err);
                 err = "";
-                int input = getValidInt(new int[] {1,2});
+                int input = getValidInt(new int[] {0,1});
                 return input == 1;
             } catch (IllegalArgumentException e) {
                 err = e.getMessage();
@@ -107,7 +129,7 @@ public class Game {
         String[] opts = options.split(",");
         int[] ints = new int[opts.length];
         for (int i = 0; i < opts.length; i++) {
-            ints[i] = i+1;
+            ints[i] = i;
         }
         while (true) {
             try {
@@ -140,7 +162,7 @@ public class Game {
             try {
                 Ui.printBoardPage(this, err);
                 err = "";
-                int input = getValidInt(board.getEmptyColumns());
+                int input = getValidInt(board.getAvailableColumns());
                 return input - 1;
             } catch (IllegalArgumentException e){
                 err = e.getMessage();
@@ -156,17 +178,17 @@ public class Game {
         int input;
         try {
             input = Integer.parseInt(inputStr);
-
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Input must be a number!");
         }
         for (int i : options) {
-            if (i == input) {
+            if (i + 1 == input) {
                 return input;
             }
         }
         throw new IllegalArgumentException("Input not contained in list of options");
     }
+
     public String getValidString() {
         String input;
         input = scanner.nextLine();
