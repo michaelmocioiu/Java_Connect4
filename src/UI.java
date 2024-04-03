@@ -1,9 +1,13 @@
+//Michael Mocioiu 101569108
+//Jason Gunawan 101465525
+
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class UI {
+    //Screen width is not modifiable within the program, but that functionality can be implemented rather easily
     public int ScreenWidth;
     public String pageTitle, pageHeadTop, pageHeadBot, pageEmptyHeadLine, pageEmptyBodyLine, pageDiv, pageDashDiv, pageBot, mainColour;
     public static Map<String, String> colours = new HashMap<>();
@@ -20,7 +24,7 @@ public class UI {
         if (ScreenWidth % 2 == 0) ScreenWidth++;
         refreshBorders();
     }
-
+    //used to ensure that borders are the correct colour, as well as initializing them in the constructor
     public void refreshBorders(){
         pageTitle = formatBorder("Home", "┌","┐");
         pageHeadTop = formatBorder("", "│ ┌", "┐ │");
@@ -31,14 +35,14 @@ public class UI {
         pageDashDiv = formatBorder(" ─", "├", "┤");
         pageBot = formatBorder("", "└", "┘");
     }
-
+    //used to colour text using ANSII codes
     public static String colourText(String text, String colour) {
         if (colours.containsKey(colour)){
             return colours.get(colour) + text + colours.get("reset");
         }
         else throw new IllegalArgumentException("Invalid colour argument");
     }
-
+    //used to set the border colour
     public void setMainColour(String colour) {
         if (colours.containsKey(colour)){
             mainColour = colours.get(colour);
@@ -46,18 +50,22 @@ public class UI {
         }
         else throw new IllegalArgumentException("Invalid colour argument");
     }
+
+    //used to colour textr based on maincolour
     public String colourMain(String message) {return mainColour + message + colours.get("reset");}
     
-
+    //clears the console for 'pages' to look like its one window
     public void clear(){
         System.out.print("\033[H\033[2J");  
         System.out.flush();  
     }
 
+    //used to change the title of the outer border
     public void setTitle(String text) {
         pageTitle = formatBorder(text, "┌","┐");
     }
 
+    //centertext functions for keeping stuff in the UI centered 
     public String centerText(String text, String tip) {
         int left = (ScreenWidth - text.length() - (tip.length() * 2)) / 2;
         int right = ScreenWidth - text.length() - left - (tip.length() * 2);
@@ -70,6 +78,7 @@ public class UI {
         return colourMain(tip) + " ".repeat(left) + text + " ".repeat(right) + colourMain(tip);
     }
 
+    //format functions for setting the UI up in a consistent and modular fashion
     public String formatBorder(String text, String leftTip, String rightTip) {
         int left = (ScreenWidth - text.length() - (leftTip.length() + rightTip.length())) / 2;
         int right = ScreenWidth - text.length() - left - (leftTip.length() * 2);
@@ -131,9 +140,6 @@ public class UI {
             + colourMain("    │");
     }
 
-    
-
-
     public String formatBoardSection(String turn, Board board) {
         String out = "";
         String b = colourMain("│");
@@ -157,6 +163,7 @@ public class UI {
         return "\n" + arrows + pad + " " + b + "\n" + nums + pad + " " + b;
     }
 
+    // basic page print function which gets called by all the top level print functions
     public void printPage(String title, String head, String body, String err){
         clear();
         setTitle(title);
@@ -178,7 +185,7 @@ public class UI {
         }
         System.out.println(pageBot);
     }
-
+    // the rest are different print functions for displaying different parts of the UI
     public void printMCPage(String title, String prompt, String options, String err) {
         printPage(
             title,
@@ -225,11 +232,7 @@ public class UI {
         );
     }
 
-    
-
     public void printMessagePage(String title, String message, String err) {
         printPage(title, message, "", err);
     }
-
-    
 }

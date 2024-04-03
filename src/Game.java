@@ -1,3 +1,5 @@
+//Michael Mocioiu 101569108
+//Jason Gunawan 101465525
 import java.util.Scanner;
 
 public class Game {
@@ -87,7 +89,7 @@ public class Game {
         }
     }
 
-
+    //turn handling method, will place the piece and then check if the game is either won or drawn
     public void resolveTurn(int posX, Board board){
         int y = board.placePiece(posX);
         if (y == -1) {
@@ -96,7 +98,7 @@ public class Game {
             winner = "none";
         }
     }
-
+    //top level input function for the rematch
     public boolean getRematchInput() {
         while (true) {
             try {
@@ -114,7 +116,7 @@ public class Game {
 
         }
     }
-
+    //top level input function for any multiple choice questions
     public int getMCInput(String title, String prompt, String options) {
         String[] opts = options.split(",");
         int[] ints = new int[opts.length];
@@ -133,7 +135,7 @@ public class Game {
             }
         }
     }
-
+    //top level input function for getting player names
     public String getNameInput(int player) {
         while (true) {
             try {
@@ -147,6 +149,7 @@ public class Game {
         }
     }
 
+    //top level input function for getting player moves in game
     public int getGameInput() {
         while (true) {
             try {
@@ -160,6 +163,7 @@ public class Game {
         }
     }
 
+    //generic input function for getting an integer input from a list of options
     public int getValidInt(int[] options) {
         String inputStr = scanner.nextLine().trim();
         if (inputStr.isEmpty()) {
@@ -178,7 +182,7 @@ public class Game {
         }
         throw new IllegalArgumentException("Input not contained in list of options");
     }
-
+    //generic input function for getting a non empty string input
     public String getValidString() {
         String input;
         input = scanner.nextLine();

@@ -1,3 +1,5 @@
+//Michael Mocioiu 101569108
+//Jason Gunawan 101465525
 import java.util.Arrays;
 
 public class Board {
