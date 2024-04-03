@@ -213,6 +213,18 @@ public class UI {
         );
     }
 
+    public void printDrawPage(Game game, String err) {
+        setMainColour("blue");
+        printPage(
+            " Draw ",
+            "The game is a draw!",
+            formatPlayerDisplay(game) + "\n" + 
+            formatBoardSection(game.winner, game.board) + "\n" +
+            formatBody("Input 1 to rematch or 2 to return to the main menu."),
+            err
+        );
+    }
+
     
 
     public void printMessagePage(String title, String message, String err) {

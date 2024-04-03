@@ -2,12 +2,13 @@ import java.util.Arrays;
 
 public class Board {
     // the board data will be stored sideways to make the action code simpler
-    // top row in the array is the leftmost board column, and leftmost column is the
-    // bottom row
+    // top row in the array is the leftmost board column, and leftmost column is the  bottom row
+    //board also handles the turns
     public String[][] boardData = new String[7][6];
     public String currentTurn;
 
     public Board() {
+        //instantiate blank board
         for (String[] col : boardData) {
             Arrays.fill(col, " ");
         }
@@ -15,11 +16,13 @@ public class Board {
     }
 
     public Board(String[][] boardData, String currentTurn) {
+        //instantiate board from existing board data
         this.boardData = boardData;
         this.currentTurn = currentTurn;
     }
 
     public Board clone() {
+        //used for the 'simulated' moves 
         String[][] clonedata = Arrays.copyOf(boardData, boardData.length);
         for (int i = 0; i < boardData.length; i++) {
             clonedata[i] = Arrays.copyOf(boardData[i], boardData[i].length);
@@ -27,6 +30,7 @@ public class Board {
         return new Board(clonedata, this.currentTurn);
     }
 
+    //methods to check a cell's contents
     public boolean isCellEmpty(int col, int row) {
         return boardData[col][row].equals(" ");
     }
@@ -39,6 +43,7 @@ public class Board {
         return !isCellMine(col, row);
     }
 
+    //method for gathering the columns which have empty spaces
     public int[] getAvailableColumns() {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i <= 6; i++) {
@@ -49,6 +54,7 @@ public class Board {
         return Arrays.stream(out.toString().split("\\s+")).mapToInt(Integer::parseInt).toArray();
     }
 
+    //Method for retreiving the next available slot in a column, return -1 if it is full
     public int getEmptyRow(int col) {
         if (col < 0 || col > 6) {
             throw new IllegalArgumentException("Invalid column: must be 0-6");
@@ -60,7 +66,7 @@ public class Board {
         }
         return -1;
     }
-
+    //method for checking if the game is won, by checking 3 peices on either side in the cardinal directions
     public boolean isGameWin(int startCol, int startRow) {
         // horizontal
         int count = 0;
@@ -103,7 +109,7 @@ public class Board {
             currentCol++;
         }
 
-        // diagonal (NW)
+        // diagonal (SE)
         count = 0;
         minNumb = Math.min(startCol, 5 - startRow);
         currentCol = startCol - minNumb;
@@ -122,6 +128,7 @@ public class Board {
         return false;
     }
 
+    //places piece if valid, then checks if the game is won/drawn. Will return the y position otherwise
     public int placePiece(int col) {
         if (col < 0 || col > 6) {
             throw new IllegalArgumentException("Invalid column: must be 0-6");
@@ -131,6 +138,8 @@ public class Board {
             boardData[col][row] = currentTurn;
             if (isGameWin(col, row)) {
                 return -1;
+            } else if (getAvailableColumns().length == 0) {
+                return -2;
             }
             currentTurn = currentTurn.equals("r") ? "y" : "r";
             return row;
@@ -139,10 +148,12 @@ public class Board {
         }
     }
 
+    //used to convert the 'r' and 'y' strings to a display red O and yellow X
     public String getDisplayPiece(String piece) {
         return (piece.equals("r") ? "\u001B[31mO" : (piece.equals("y")) ? "\u001B[33mX" : " ") + "\u001B[0m";
     }
 
+    //used to present the board
     public String draw() {
         String topBorder = "┌───┬───┬───┬───┬───┬───┬───┐\n";
         String middleBorder = "├───┼───┼───┼───┼───┼───┼───┤\n";

@@ -16,20 +16,21 @@ public class Game {
       winner = "";
     }
 
+    //used to clear the board and reset the winner and turns
     public void RestartMatch() {
         board = new Board();
         winner = "";
         board.currentTurn = "r";
     }
 
-
+    //starts the game and prompts user for their input
     public void Launch(){
         int selection;
         while (true){
             err = "";
             selection = getMCInput(" Home ", "Connect 4!, Choose player count or exit:", "Singleplayer,Multiplayer,Exit");
             if (selection == 3) {
-                //exit
+                return;
             }
             if (selection == 1) {
                 isAiMatch = true;
@@ -40,41 +41,23 @@ public class Game {
         }
     }
 
+    //main chunk of the game, contains both loops for the ai and multiplayer matches
     public void StartGame() {
+        //team selection
         if (getMCInput("Team Selection", "Player 1 select your colour:", "Red,Yellow") == 2) {
             P1Colour = "y";
             P2Colour = "r";
         }
+        //p1 name input
         P1Name = getNameInput(1);
+        //AI match main loop
         if (isAiMatch) {
             while (true) {
                 RestartMatch();
+                //depth/difficulty selection for the ai
                 int diffInput = getMCInput("Select Bot Difficulty", "Select the difficulty of the bot,(Smarter bots need more time to think)", "Normal,Hard,Genius");
                 int depth = (diffInput == 1) ? 3 : (diffInput == 2) ? 5 : 7;
-                // board.boardData = new String[][] {
-                //     {
-                //         " ", " ", " ", " ", " ", " "
-                //     },
-                //     {
-                //         "y", " ", " ", " ", " ", " "
-                //     },
-                //     {
-                //         "y", "y", "y", " ", " ", " "
-                //     },
-                //     {
-                //         " ", " ", " ", " ", " ", " "
-                //     },
-                //     {
-                //         " ", " ", " ", " ", " ", " "
-                //     },
-                //     {
-                //         " ", " ", " ", " ", " ", " "
-                //     },
-                //     {
-                //         " ", " ", " ", " ", " ", " "
-                //     }
-                // };
-                while (winner.equals("")) {
+                while (winner.isEmpty()) {
                     if (currentTurn == P1Colour) {
                         resolveTurn(getGameInput(), board);
                     } else {
@@ -88,10 +71,11 @@ public class Game {
                 }
             }
         } else {
+            //Multiplayer main loop
             P2Name = getNameInput(2);
             while(true){
                 RestartMatch();
-                while (winner.equals("")) {
+                while (winner.isEmpty()) {
                     resolveTurn(getGameInput(), board);
                     currentTurn = (currentTurn.equals("r") ? "y" : "r");
 
@@ -108,13 +92,19 @@ public class Game {
         int y = board.placePiece(posX);
         if (y == -1) {
             winner = board.currentTurn;
+        } else if (y == -2) {
+            winner = "none";
         }
     }
 
     public boolean getRematchInput() {
         while (true) {
             try {
-                Ui.printWinPage(this, err);
+                if (winner.equals("none")) {
+
+                } else {
+                    Ui.printWinPage(this, err);
+                }
                 err = "";
                 int input = getValidInt(new int[] {0,1});
                 return input == 1;
@@ -192,7 +182,7 @@ public class Game {
     public String getValidString() {
         String input;
         input = scanner.nextLine();
-        if (input != null && input.trim() != "") {
+        if (input != null && !input.trim().isEmpty()) {
             return input;
         }
         throw new IllegalArgumentException("Invalid input!");
