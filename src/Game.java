@@ -7,7 +7,7 @@ public class Game {
     public String P1Colour, P2Colour,P1Name, P2Name, err, currentTurn, winner;
     public Board board = new Board();
     Scanner scanner = new Scanner(System.in);
-    UI Ui = new UI(130);
+    UI Ui = new UI(90);
 
     public Game () {
       P1Colour = "r";
